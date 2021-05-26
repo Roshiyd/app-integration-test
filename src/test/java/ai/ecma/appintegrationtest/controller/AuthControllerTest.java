@@ -1,9 +1,12 @@
 package ai.ecma.appintegrationtest.controller;
 
 import ai.ecma.appintegrationtest.AppIntegrationTestApplication;
+import ai.ecma.appintegrationtest.config.TestPostgresqlConfig;
+import ai.ecma.appintegrationtest.entity.User;
 import ai.ecma.appintegrationtest.payload.ApiResult;
 import ai.ecma.appintegrationtest.payload.SignInDTO;
 import ai.ecma.appintegrationtest.payload.SignUpDTO;
+import ai.ecma.appintegrationtest.repository.UserRepository;
 import ai.ecma.appintegrationtest.utils.TestUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -14,17 +17,24 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.jdbc.EmbeddedDatabaseConnection;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.util.Optional;
+
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 
 @AutoConfigureMockMvc
+@Import({TestPostgresqlConfig.class})
 @ExtendWith(SpringExtension.class)
+@AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.NONE, replace = AutoConfigureTestDatabase.Replace.NONE)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = {AppIntegrationTestApplication.class})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -36,8 +46,10 @@ class AuthControllerTest {
     private WebApplicationContext context;
     //    @MockBean
 //    private AuthService authService;
-    private ArgumentCaptor<SignUpDTO> userArgumentCaptor = ArgumentCaptor.forClass(SignUpDTO.class);
+//    private ArgumentCaptor<SignUpDTO> userArgumentCaptor = ArgumentCaptor.forClass(SignUpDTO.class);
     private static String token;
+    @Autowired
+    UserRepository userRepository;
 
 
     @BeforeAll
@@ -52,6 +64,8 @@ class AuthControllerTest {
 
         ApiResult<SignUpDTO> signUpApiResult = TestUtil.registerUser(signUpDTO, HttpStatus.OK);
         TestUtil.validateSuccessApiResponse(signUpApiResult);
+        Optional<User> aa = userRepository.findByUsername("aa");
+        System.out.println(aa.isEmpty());
 //
 //        //VERIFY/ACTIVATE EMAIL/ACCOUNT
 //        Mockito.verify(authService, Mockito.times(1))
@@ -94,3 +108,4 @@ class AuthControllerTest {
         TestUtil.signIn("siroj", "root123", HttpStatus.OK);
     }
 }
+
