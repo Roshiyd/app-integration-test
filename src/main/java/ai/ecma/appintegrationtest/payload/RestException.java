@@ -8,14 +8,12 @@ import org.springframework.http.HttpStatus;
 @Data
 public class RestException extends RuntimeException {
 
-    private String user_msg;
-    private Integer error_code;
+    private String userMsg;
     private HttpStatus status;
 
-    public RestException(String user_msg, Integer error_code, HttpStatus status) {
-        super(user_msg);
-        this.user_msg = user_msg;
-        this.error_code = error_code;
+    public RestException(String userMsg, HttpStatus status) {
+        super(userMsg);
+        this.userMsg = userMsg;
         this.status = status;
     }
 

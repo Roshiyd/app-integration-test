@@ -10,7 +10,7 @@ public interface RestConstants {
     String API_UTILS_V_1 = "/api/v1/utils";
 
     String LANGUAGE_HEADER = "language";
-    String AUTHENTICATION_HEADER = "Authentication";
+    String AUTHENTICATION_HEADER = "Authorization";
     String ADMIN = "ROLE_ADMIN";
     String EMPLOYEE = "ROLE_EMPLOYEE";
     String DEVELOPER = "ROLE_DEVELOPER";

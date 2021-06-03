@@ -27,8 +27,6 @@ import java.util.Objects;
 @Configuration
 public class TestPostgresqlConfig {
 
-    /*private static final List<String> DEFAULT_ADDITIONAL_INIT_DB_PARAMS = Arrays
-            .asList("--nosync", "--locale=en_US.UTF-8");*/
     @Autowired
     Environment env;
 
@@ -40,36 +38,33 @@ public class TestPostgresqlConfig {
     @Bean
     @DependsOn("postgresProcess")
     public DataSource dataSource() {
-        DriverManagerDataSource ds = new DriverManagerDataSource();
-        ds.setDriverClassName(Objects.requireNonNull(env.getProperty("hibernate.connection.driver")));
-        ds.setUsername(env.getProperty("hibernate.connection.username"));
-        ds.setPassword(env.getProperty("hibernate.connection.password"));
-        ds.setUrl(env.getProperty("hibernate.connection.url"));
-        return ds;
+        DriverManagerDataSource driverManagerDataSource = new DriverManagerDataSource();
+        driverManagerDataSource.setDriverClassName(Objects.requireNonNull(env.getProperty("spring.datasource.driver-class-name")));
+        driverManagerDataSource.setUsername(env.getProperty("spring.datasource.username"));
+        driverManagerDataSource.setPassword(env.getProperty("spring.datasource.password"));
+        driverManagerDataSource.setUrl(env.getProperty("spring.datasource.url"));
+        return driverManagerDataSource;
+
     }
 
     @Bean
     public JpaVendorAdapter jpaVendorAdapter() {
-        HibernateJpaVendorAdapter theVendorAdapter = new HibernateJpaVendorAdapter();
-        theVendorAdapter.setDatabasePlatform(env.getProperty("hibernate.connection.dialect"));
-        theVendorAdapter.setShowSql("true".equalsIgnoreCase(env.getProperty("hibernate.showsql")));
-        theVendorAdapter.setGenerateDdl(Boolean.TRUE);
-        theVendorAdapter.setDatabase(Database.valueOf(Objects.requireNonNull(env.getProperty("hibernate.dbtype"))));
-        return theVendorAdapter;
+        HibernateJpaVendorAdapter hibernateJpaVendorAdapter = new HibernateJpaVendorAdapter();
+        hibernateJpaVendorAdapter.setDatabasePlatform(env.getProperty("hibernate.connection.dialect"));
+        hibernateJpaVendorAdapter.setShowSql("true".equalsIgnoreCase(env.getProperty("spring.jpa.show-sql")));
+        hibernateJpaVendorAdapter.setGenerateDdl(Boolean.TRUE);
+        hibernateJpaVendorAdapter.setDatabase(Database.valueOf(Objects.requireNonNull(env.getProperty("hibernate.dbtype"))));
+        return hibernateJpaVendorAdapter;
     }
 
     @Bean
     public PostgresConfig postgresConfig() throws IOException {
-        final PostgresConfig postgresConfig = new PostgresConfig(Version.V9_6_11,
-//                new AbstractPostgresConfig.Net("localhost", Network.getFreeServerPort()),
-                new AbstractPostgresConfig.Net("localhost", 5435), //this is port for embedded virtual database see test profile properties
-                new AbstractPostgresConfig.Storage("postgres"),
+        return new PostgresConfig(Version.V11_1,
+                new AbstractPostgresConfig.Net(env.getProperty("spring.datasource.host"), Integer.parseInt(env.getProperty("spring.datasource.port"))), //this is port for embedded virtual database see test profile properties
+                new AbstractPostgresConfig.Storage(env.getProperty("spring.datasource.dbName")),
                 new AbstractPostgresConfig.Timeout(),
-//                new AbstractPostgresConfig.Credentials(env.getProperty("hibernate.connection.username"), env.getProperty("hibernate.connection.password"))
-                new AbstractPostgresConfig.Credentials("postgres","root123")
+                new AbstractPostgresConfig.Credentials(env.getProperty("spring.datasource.username"), env.getProperty("spring.datasource.password"))
         );
-//        postgresConfig.getAdditionalInitDbParams().addAll(DEFAULT_ADDITIONAL_INIT_DB_PARAMS);
-        return postgresConfig;
     }
 
     @Bean
@@ -78,20 +73,11 @@ public class TestPostgresqlConfig {
         entityManagerFactory.setDataSource(dataSource());
         entityManagerFactory.setPackagesToScan("ai.ecma.appintegrationtest.entity");
         entityManagerFactory.setPersistenceUnitName("postgres");
-        /*theEntityManager.setPersistenceUnitName(configrationProperties
-                .getString("db.jpa.persistanceUnit"));*/
         entityManagerFactory.setJpaVendorAdapter(jpaVendorAdapter());
 
         HashMap<String, Object> properties = new HashMap<>();
-
         // JPA & Hibernate
         properties.put("hibernate.dialect", env.getProperty("hibernate.connection.dialect"));
-        properties.put("hibernate.show-sql", Boolean.TRUE);
-        properties.put("hibernate.hbm2ddl.auto", "update");
-        properties.put("hibernate.temp.use_jdbc_metadata_defaults", "false");
-//        properties.put("useUnicode", Boolean.TRUE);
-//        properties.put("characterEncoding", "UTF-8");
-
         entityManagerFactory.setJpaPropertyMap(properties);
         entityManagerFactory.afterPropertiesSet();
         return entityManagerFactory;

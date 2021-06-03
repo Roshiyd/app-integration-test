@@ -77,6 +77,6 @@ public class ExceptionHelper {
      */
     @ExceptionHandler(value = {RestException.class})
     public ResponseEntity<?> handleException(RestException ex) {
-        return new ResponseEntity<>(new ApiResult<>(ex.getMessage(),ex.getError_code()), ex.getStatus());
+        return new ResponseEntity<>(new ApiResult<>(ex.getMessage(), ex.getStatus().value()), ex.getStatus());
     }
 }
