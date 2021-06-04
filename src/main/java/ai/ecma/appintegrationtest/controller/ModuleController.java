@@ -43,7 +43,7 @@ public class ModuleController {
     }
 
     @GetMapping("/{id}")
-    public ApiResult<Module> getModule(Integer id){
+    public ApiResult<Module> getModule(@PathVariable Integer id){
 
         Module module = moduleService.getModule(id);
 

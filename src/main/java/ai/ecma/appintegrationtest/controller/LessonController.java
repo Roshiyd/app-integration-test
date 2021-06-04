@@ -44,7 +44,7 @@ public class LessonController {
     }
 
     @GetMapping("/{id}")
-    public ApiResult<Lesson> getLesson(Integer id){
+    public ApiResult<Lesson> getLesson(@PathVariable Integer id){
 
         Lesson lesson = lessonService.getLesson(id);
 
