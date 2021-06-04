@@ -62,7 +62,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/v1/auth/**")
                 .permitAll()
 //                .regexMatchers("/course(/)?\\\\w+(/)?")
-                .antMatchers(HttpMethod.GET, "/api/course/**")
+                .antMatchers(HttpMethod.GET, "/api/course/**","/api/module/**","/api/lesson/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated();

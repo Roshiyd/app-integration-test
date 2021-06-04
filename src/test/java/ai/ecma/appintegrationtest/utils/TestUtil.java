@@ -3,10 +3,10 @@ package ai.ecma.appintegrationtest.utils;
 
 import ai.ecma.appintegrationtest.controller.AuthController;
 import ai.ecma.appintegrationtest.controller.CourseController;
+import ai.ecma.appintegrationtest.controller.LessonController;
+import ai.ecma.appintegrationtest.controller.ModuleController;
 import ai.ecma.appintegrationtest.entity.Course;
-import ai.ecma.appintegrationtest.payload.ApiResult;
-import ai.ecma.appintegrationtest.payload.SignInDTO;
-import ai.ecma.appintegrationtest.payload.SignUpDTO;
+import ai.ecma.appintegrationtest.payload.*;
 import io.restassured.common.mapper.TypeRef;
 import io.restassured.http.ContentType;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
@@ -22,6 +22,9 @@ public class TestUtil {
 
     public final String AUTH_CONTROLLER_PATH = AuthController.CONTROLLER_URI;
     public final String COURSE_CONTROLLER_PATH = CourseController.COURSE_URL;
+    public final String MODULE_CONTROLLER_PATH = ModuleController.MODULE_URL;
+    public final String LESSON_CONTROLLER_PATH = LessonController.LESSON_URL;
+
     public final Random RANDOM = new Random();
 //    private final ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
 //    private final ArgumentCaptor<String> hostArgumentCaptor = ArgumentCaptor.forClass(String.class);
@@ -126,23 +129,7 @@ public class TestUtil {
         Assertions.assertThat(apiResult.getData()).isNotNull();
     }
 
-    public <T> T getRequest(String url, TypeRef<T> typeRef, String token, HttpStatus httpStatus) {
-        return RestAssuredMockMvc
-                .given()
-                .header(RestConstants.AUTHENTICATION_HEADER, token == null ? "" : token)
-                .contentType(ContentType.JSON)
-                .accept(ContentType.JSON)
-                .log().all()
-                .when()
-                .get(url)
-                .then()
-                .log().all()
-                .statusCode(httpStatus.value())
-                .contentType(ContentType.JSON)
-                .extract()
-                .body()
-                .as(typeRef);
-    }
+
 
 //    public <T> byte[] getRequestForPdf(String url, String token, HttpStatus httpStatus) {
 //        return RestAssuredMockMvc
@@ -162,6 +149,120 @@ public class TestUtil {
 //                .asByteArray();
 //    }
 
+
+    public static ApiResult<String> addCourse(Course course, String token, HttpStatus httpStatus) {
+        return TestUtil.postRequest(
+                course,
+                TestUtil.COURSE_CONTROLLER_PATH,
+                new TypeRef<ApiResult<String>>() {
+                }, token, httpStatus);
+    }
+
+    public static ApiResult<String> addModule(ModuleDTO moduleDTO, String token, HttpStatus httpStatus) {
+        return TestUtil.postRequest(
+                moduleDTO,
+                TestUtil.MODULE_CONTROLLER_PATH,
+                new TypeRef<ApiResult<String>>() {
+                }, token, httpStatus);
+    }
+
+    public static ApiResult<String> addLesson(LessonDTO lessonDTO, String token, HttpStatus httpStatus) {
+        return TestUtil.postRequest(
+                lessonDTO,
+                TestUtil.LESSON_CONTROLLER_PATH,
+                new TypeRef<ApiResult<String>>() {
+                }, token, httpStatus);
+    }
+
+    public static ApiResult<String> editCourse(Course course, String token, HttpStatus httpStatus) {
+        return TestUtil.putRequest(
+                course,
+                TestUtil.COURSE_CONTROLLER_PATH,
+                new TypeRef<ApiResult<String>>() {
+                }, token, httpStatus);
+    }
+
+    public static ApiResult<String> editModule(ModuleDTO moduleDTO, String token, HttpStatus httpStatus) {
+        return TestUtil.putRequest(
+                moduleDTO,
+                TestUtil.MODULE_CONTROLLER_PATH,
+                new TypeRef<ApiResult<String>>() {
+                }, token, httpStatus);
+    }
+
+    public static ApiResult<String> editLesson(LessonDTO lessonDTO, String token, HttpStatus httpStatus) {
+        return TestUtil.putRequest(
+                lessonDTO,
+                TestUtil.LESSON_CONTROLLER_PATH,
+                new TypeRef<ApiResult<String>>() {
+                }, token, httpStatus);
+    }
+
+    public static ApiResult<String> deleteCourse(Integer id, String token, HttpStatus httpStatus) {
+        return TestUtil.deleteRequest(
+                TestUtil.COURSE_CONTROLLER_PATH+"/"+id,
+                new TypeRef<ApiResult<String>>() {
+                }, token, httpStatus);
+    }
+
+    public static ApiResult<String> deleteModule(Integer id, String token, HttpStatus httpStatus) {
+        return TestUtil.deleteRequest(
+                TestUtil.MODULE_CONTROLLER_PATH+"/"+id,
+                new TypeRef<ApiResult<String>>() {
+                }, token, httpStatus);
+    }
+
+    public static ApiResult<String> deleteLesson(Integer id, String token, HttpStatus httpStatus) {
+        return TestUtil.deleteRequest(
+                TestUtil.LESSON_CONTROLLER_PATH+"/"+id,
+                new TypeRef<ApiResult<String>>() {
+                }, token, httpStatus);
+    }
+
+    public static ApiResult<?> getCourses(HttpStatus httpStatus) {
+        return TestUtil.getRequest(
+                TestUtil.COURSE_CONTROLLER_PATH,
+                new TypeRef<ApiResult<?>>() {
+                }, null, httpStatus);
+    }
+
+    public static ApiResult<?> getModules(HttpStatus httpStatus) {
+        return TestUtil.getRequest(
+                TestUtil.MODULE_CONTROLLER_PATH,
+                new TypeRef<ApiResult<?>>() {
+                }, null, httpStatus);
+    }
+
+    public static ApiResult<?> getLessons(HttpStatus httpStatus) {
+        return TestUtil.getRequest(
+                TestUtil.LESSON_CONTROLLER_PATH,
+                new TypeRef<ApiResult<?>>() {
+                }, null, httpStatus);
+    }
+
+    public static ApiResult<?> getOneCourse(Integer id, HttpStatus httpStatus) {
+        return TestUtil.getRequest(
+                TestUtil.COURSE_CONTROLLER_PATH+"/"+id,
+                new TypeRef<ApiResult<?>>() {
+                }, null, httpStatus);
+    }
+
+    public static ApiResult<?> getOneModule(Integer id, HttpStatus httpStatus) {
+        System.out.println(LESSON_CONTROLLER_PATH+"/"+id);
+        return TestUtil.getRequest(
+                TestUtil.MODULE_CONTROLLER_PATH+"/"+id,
+                new TypeRef<ApiResult<?>>() {
+                }, null, httpStatus);
+    }
+
+
+    public static ApiResult<?> getOneLesson(Integer id, HttpStatus httpStatus) {
+        return TestUtil.getRequest(
+                TestUtil.LESSON_CONTROLLER_PATH+"/"+id,
+                new TypeRef<ApiResult<?>>() {
+                }, null, httpStatus);
+    }
+
     public <T> T postRequest(Object object,
                              String postUrl,
                              TypeRef<T> typeRef,
@@ -170,7 +271,7 @@ public class TestUtil {
         token = "Bearer " + token;
         return RestAssuredMockMvc
                 .given()
-                .header(RestConstants.AUTHENTICATION_HEADER, token == null ? "" : token)
+                .header(RestConstants.AUTHENTICATION_HEADER, token)
                 .header(RestConstants.LANGUAGE_HEADER, "en")
                 .contentType(ContentType.JSON)
                 .accept(ContentType.JSON)
@@ -187,39 +288,75 @@ public class TestUtil {
                 .as(typeRef);
     }
 
-    public static ApiResult<String> addCourse(Course course, String token, HttpStatus httpStatus) {
-        return TestUtil.postRequest(
-                course,
-                TestUtil.COURSE_CONTROLLER_PATH,
-                new TypeRef<ApiResult<String>>() {
-                }, token, httpStatus);
+
+    //
+    public <T> T putRequest(Object body, String putUrl, TypeRef<T> typeRef, String token, HttpStatus httpStatus) {
+        token = "Bearer " + token;
+        return RestAssuredMockMvc
+                .given()
+                .header(RestConstants.AUTHENTICATION_HEADER, token)
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .body(body)
+                .log().all()
+                .when()
+                .put(putUrl)
+                .then()
+                .log().all()
+                .statusCode(httpStatus.value())
+                .contentType(ContentType.JSON)
+                .extract()
+                .body()
+                .as(typeRef);
     }
 
-    public static ApiResult<String> editCourse(Course course, String token, HttpStatus httpStatus) {
-        return TestUtil.putRequest(
-                course,
-                TestUtil.COURSE_CONTROLLER_PATH,
-                new TypeRef<ApiResult<String>>() {
-                }, token, httpStatus);
+
+    public <T> T deleteRequest(String deleteUrl, TypeRef<T> typeRef, String token, HttpStatus httpStatus) {
+        token = "Bearer " + token;
+        return RestAssuredMockMvc
+                .given()
+                .header(RestConstants.AUTHENTICATION_HEADER, token)
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .log().all()
+                .when()
+                .delete(deleteUrl)
+                .then()
+                .log().all()
+                .statusCode(httpStatus.value())
+                .contentType(ContentType.JSON)
+                .extract()
+                .body()
+                .as(typeRef);
     }
 
-//    public <T> T deleteRequest(String deleteUrl, TypeRef<T> typeRef, String token, HttpStatus httpStatus) {
-//        return RestAssuredMockMvc
-//                .given()
-//                .header(RestConstants.AUTHENTICATION_HEADER, token == null ? "" : token)
-//                .contentType(ContentType.JSON)
-//                .accept(ContentType.JSON)
-//                .log().all()
-//                .when()
-//                .delete(deleteUrl)
-//                .then()
-//                .log().all()
-//                .statusCode(httpStatus.value())
-//                .contentType(ContentType.JSON)
-//                .extract()
-//                .body()
-//                .as(typeRef);
-//    }
+    public <T> T getRequest(String url, TypeRef<T> typeRef, String token, HttpStatus httpStatus) {
+        return RestAssuredMockMvc
+                .given()
+                .header(RestConstants.AUTHENTICATION_HEADER, token == null ? "" : token)
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .log().all()
+                .when()
+                .get(url)
+                .then()
+                .log().all()
+                .statusCode(httpStatus.value())
+                .contentType(ContentType.JSON)
+                .extract()
+                .body()
+                .as(typeRef);
+    }
+
+
+    public String withBearer(String token) {
+        return "Bearer " + token;
+    }
+
+    /*public static Map<String, Integer> getStatData() {
+        return getRequest(MonitoringController.MANAGEMENT + MonitoringController.AVG_BY_KEY, new TypeRef<>() {
+        }, null, HttpStatus.OK);
+    }*/
 
 //    public <T> T postRequestWithLanguageHeader(Object object,
 //                                               String postUrl,
@@ -244,32 +381,5 @@ public class TestUtil {
 //                .body()
 //                .as(typeRef);
 //    }
-//
-    public <T> T putRequest(Object body, String putUrl, TypeRef<T> typeRef, String token, HttpStatus httpStatus) {
-        return RestAssuredMockMvc
-                .given()
-                .header(RestConstants.AUTHENTICATION_HEADER, token)
-                .contentType(ContentType.JSON)
-                .accept(ContentType.JSON)
-                .body(body)
-                .log().all()
-                .when()
-                .put(putUrl)
-                .then()
-                .log().all()
-                .statusCode(httpStatus.value())
-                .contentType(ContentType.JSON)
-                .extract()
-                .body()
-                .as(typeRef);
-    }
 
-    public String withBearer(String token) {
-        return "Bearer " + token;
-    }
-
-    /*public static Map<String, Integer> getStatData() {
-        return getRequest(MonitoringController.MANAGEMENT + MonitoringController.AVG_BY_KEY, new TypeRef<>() {
-        }, null, HttpStatus.OK);
-    }*/
 }
